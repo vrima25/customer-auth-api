@@ -1,0 +1,28 @@
+# Environment variables
+.env
+*.local
+ 
+# Compiled binaries
+customer-auth-api
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+ 
+# Go build/test artifacts
+*.test
+*.out
+ 
+# Dependency directories (if vendoring is used)
+vendor/
+ 
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+ 
+# OS files
+.DS_Store
+Thumbs.db
