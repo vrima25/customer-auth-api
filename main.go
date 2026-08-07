@@ -43,11 +43,10 @@ func main() {
 	healthController := controller.NewHealthController(db)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", healthController.Health)
-	mux.HandleFunc("/api/customers/register", authController.Register)
-	mux.HandleFunc("/api/customers/login", authController.Login)
-	mux.Handle(
-		"/api/customers/me",
+	mux.HandleFunc("GET /health", healthController.Health)
+	mux.HandleFunc("POST /api/v1/auth/register", authController.Register)
+	mux.HandleFunc("POST /api/v1/auth/login", authController.Login)
+	mux.Handle("GET /api/v1/customers/me",
 		middleware.AuthMiddleware(cfg.JWTSecret)(http.HandlerFunc(authController.Me)),
 	)
 
