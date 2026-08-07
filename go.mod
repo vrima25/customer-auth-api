@@ -1,4 +1,4 @@
-module ticket-triage-api
+module github.com/vrima25/go-auth-service
 
 go 1.26.1
 

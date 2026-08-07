@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"ticket-triage-api/config"
-	"ticket-triage-api/controller"
-	"ticket-triage-api/middleware"
-	"ticket-triage-api/repository"
-	"ticket-triage-api/service"
+
+	"github.com/vrima25/go-auth-service/config"
+	"github.com/vrima25/go-auth-service/controller"
+	"github.com/vrima25/go-auth-service/middleware"
+	"github.com/vrima25/go-auth-service/repository"
+	"github.com/vrima25/go-auth-service/service"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -23,7 +24,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("DEBUG — DSN: %s", cfg.DSN())
 
 	db, err := sql.Open("postgres", cfg.DSN())
 	if err != nil {

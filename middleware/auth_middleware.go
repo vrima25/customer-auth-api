@@ -5,26 +5,27 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"ticket-triage-api/util"
+
+	"github.com/vrima25/go-auth-service/util"
 )
 
 type contextKey string
 
 const UserContextKey contextKey = "user"
 
-func writeJSONError(w http.ResponseWriter, status int, message string){
+func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
 
 func AuthMiddleware(jwtSecret string) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler{
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
-			if !strings.HasPrefix(authHeader, "Bearer"){
+			if !strings.HasPrefix(authHeader, "Bearer") {
 				writeJSONError(w, http.StatusUnauthorized, "missing or invalid authorization header")
-				return 
+				return
 			}
 
 			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
@@ -32,7 +33,7 @@ func AuthMiddleware(jwtSecret string) func(http.Handler) http.Handler {
 			claims, err := util.ParseToken(tokenString, jwtSecret)
 			if err != nil {
 				writeJSONError(w, http.StatusUnauthorized, "invalid or expired token")
-				return 
+				return
 			}
 
 			ctx := context.WithValue(r.Context(), UserContextKey, claims)

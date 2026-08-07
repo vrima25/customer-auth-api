@@ -1,6 +1,6 @@
 package interfaces
 
-import "ticket-triage-api/model"
+import "github.com/vrima25/go-auth-service/model"
 
 type AuthService interface {
 	Register(email, password, fullName string) (*model.Customer, error)

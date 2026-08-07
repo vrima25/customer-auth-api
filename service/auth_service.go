@@ -2,28 +2,29 @@ package service
 
 import (
 	"errors"
-	"ticket-triage-api/interfaces"
-	"ticket-triage-api/model"
-	"ticket-triage-api/util"
+
+	"github.com/vrima25/go-auth-service/interfaces"
+	"github.com/vrima25/go-auth-service/model"
+	"github.com/vrima25/go-auth-service/util"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
 	ErrEmailAlreadyRegistered = errors.New("email already registered")
-	ErrInvalidCredentials = errors.New("invalid email or password")
+	ErrInvalidCredentials     = errors.New("invalid email or password")
 )
 
 type authService struct {
 	customerRepo interfaces.CustomerRepository
-	jwtSecret string
+	jwtSecret    string
 }
 
 func NewAuthService(customerRepo interfaces.CustomerRepository, jwtSecret string) interfaces.AuthService {
 	return &authService{customerRepo: customerRepo, jwtSecret: jwtSecret}
 }
 
-func (s *authService) Register(email, password, full_name string) (*model.Customer, error){
+func (s *authService) Register(email, password, full_name string) (*model.Customer, error) {
 	existing, err := s.customerRepo.FindByEmail(email)
 	if err != nil {
 		return nil, err
@@ -40,9 +41,9 @@ func (s *authService) Register(email, password, full_name string) (*model.Custom
 	}
 
 	customer := &model.Customer{
-		Email : email,
-		PasswordHash : string(hashed),
-		FullName: full_name,
+		Email:        email,
+		PasswordHash: string(hashed),
+		FullName:     full_name,
 	}
 
 	if err := s.customerRepo.Create(customer); err != nil {
@@ -53,11 +54,11 @@ func (s *authService) Register(email, password, full_name string) (*model.Custom
 
 }
 
-func (s *authService) Login(email, password string) (string, *model.Customer, error){
+func (s *authService) Login(email, password string) (string, *model.Customer, error) {
 	customer, err := s.customerRepo.FindByEmail(email)
 
-	if err != nil{
-		return "",nil, err
+	if err != nil {
+		return "", nil, err
 	}
 
 	if customer == nil {
@@ -65,11 +66,10 @@ func (s *authService) Login(email, password string) (string, *model.Customer, er
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(customer.PasswordHash), []byte(password))
-	
+
 	if err != nil {
 		return "", nil, ErrInvalidCredentials
 	}
-
 
 	token, err := util.GenerateToken(customer.Email, s.jwtSecret)
 	if err != nil {

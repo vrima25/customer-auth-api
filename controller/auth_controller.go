@@ -5,42 +5,42 @@ import (
 	"errors"
 	"net/http"
 
-	"ticket-triage-api/interfaces"
-	"ticket-triage-api/middleware"
-	"ticket-triage-api/service"
-	"ticket-triage-api/util"
+	"github.com/vrima25/go-auth-service/interfaces"
+	"github.com/vrima25/go-auth-service/middleware"
+	"github.com/vrima25/go-auth-service/service"
+	"github.com/vrima25/go-auth-service/util"
 )
 
 type AuthController struct {
 	authService interfaces.AuthService
 }
 
-func NewAuthController(authService interfaces.AuthService) *AuthController{
+func NewAuthController(authService interfaces.AuthService) *AuthController {
 	return &AuthController{authService: authService}
 }
 
 type registerRequest struct {
-	Email string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 	FullName string `json:"full_name"`
 }
 
 type loginRequest struct {
-	Email string `json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func writeJSON(w http.ResponseWriter, status int, payload interface{}){
+func writeJSON(w http.ResponseWriter, status int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(payload)
 }
 
-func writeError(w http.ResponseWriter, status int, message string){
-	writeJSON(w, status, map[string]string{"error" : message})
+func writeError(w http.ResponseWriter, status int, message string) {
+	writeJSON(w, status, map[string]string{"error": message})
 }
 
-func (c *AuthController) Register(w http.ResponseWriter, r *http.Request){
+func (c *AuthController) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -64,7 +64,7 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request){
 
 	customer, err := c.authService.Register(req.Email, req.Password, req.FullName)
 	if err != nil {
-		if errors.Is(err, service.ErrEmailAlreadyRegistered){
+		if errors.Is(err, service.ErrEmailAlreadyRegistered) {
 			writeError(w, http.StatusConflict, "email already registered")
 			return
 		}
@@ -74,13 +74,13 @@ func (c *AuthController) Register(w http.ResponseWriter, r *http.Request){
 	}
 
 	writeJSON(w, http.StatusCreated, map[string]interface{}{
-		"id" : customer.ID,
-		"email" : customer.Email,
-		"full_name" : customer.FullName,
+		"id":        customer.ID,
+		"email":     customer.Email,
+		"full_name": customer.FullName,
 	})
 }
 
-func (c *AuthController) Login(w http.ResponseWriter, r *http.Request){
+func (c *AuthController) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -104,9 +104,9 @@ func (c *AuthController) Login(w http.ResponseWriter, r *http.Request){
 	}
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"token" : token,
-		"email" : customer.Email,
-		"full_name" : customer.FullName,
+		"token":     token,
+		"email":     customer.Email,
+		"full_name": customer.FullName,
 	})
 }
 
@@ -119,7 +119,6 @@ func (c *AuthController) Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
-		"email" : claims.Email,
+		"email": claims.Email,
 	})
 }
-

@@ -3,8 +3,9 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"ticket-triage-api/interfaces"
-	"ticket-triage-api/model"
+
+	"github.com/vrima25/go-auth-service/interfaces"
+	"github.com/vrima25/go-auth-service/model"
 )
 
 type customerRepository struct {
@@ -34,7 +35,7 @@ func (r *customerRepository) FindByEmail(email string) (*model.Customer, error) 
 
 	c := &model.Customer{}
 	err := r.db.QueryRow(query, email).Scan(&c.ID, &c.FullName, &c.Email, &c.PasswordHash, &c.CreatedAt)
-	
+
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -53,9 +54,9 @@ func (r *customerRepository) FindById(ID int) (*model.Customer, error) {
 	`
 	c := &model.Customer{}
 	err := r.db.QueryRow(query, ID).Scan(&c.ID, &c.FullName, &c.Email, &c.PasswordHash, &c.CreatedAt)
-	
-	if errors.Is(err, sql.ErrNoRows){
-		return nil,nil
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
 	}
 
 	if err != nil {
