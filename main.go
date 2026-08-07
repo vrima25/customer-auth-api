@@ -14,17 +14,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func main(){
+func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("no .env file found, relying on system environtment variables")
 	}
 
-	cfg := config.Load()
-	log.Printf("DEBUG — DSN: %s", cfg.DSN())
-
-	if cfg.JWTSecret == "" {
-		log.Fatal("JWT_SECRET is not set - check your .env file")
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
 	}
+	log.Printf("DEBUG — DSN: %s", cfg.DSN())
 
 	db, err := sql.Open("postgres", cfg.DSN())
 	if err != nil {
@@ -41,8 +40,10 @@ func main(){
 	customerRepo := repository.NewCustomerRepository(db)
 	authService := service.NewAuthService(customerRepo, cfg.JWTSecret)
 	authController := controller.NewAuthController(authService)
+	healthController := controller.NewHealthController(db)
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/health", healthController.Health)
 	mux.HandleFunc("/api/customers/register", authController.Register)
 	mux.HandleFunc("/api/customers/login", authController.Login)
 	mux.Handle(
@@ -50,10 +51,10 @@ func main(){
 		middleware.AuthMiddleware(cfg.JWTSecret)(http.HandlerFunc(authController.Me)),
 	)
 
-	log.Println("server running on :8080")
+	log.Printf("server running on %s", cfg.Addr())
 
 	handler := corsMiddleware(mux)
-	if err := http.ListenAndServe(":8080", handler); err != nil {
+	if err := http.ListenAndServe(cfg.Addr(), handler); err != nil {
 		log.Fatal(err)
 	}
 }
